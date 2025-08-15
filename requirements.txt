@@ -1,0 +1,7 @@
+streamlit
+qdrant-client
+langchain
+langchain-community
+langchain-google-genai
+sentence-transformers
+python-dotenv
