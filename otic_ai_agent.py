@@ -70,10 +70,12 @@
 import streamlit as st
 import os
 from langchain.chains import RetrievalQA
+from collections import Counter
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.vectorstores import Qdrant
 from langchain.embeddings import HuggingFaceEmbeddings
 from qdrant_client import QdrantClient
+import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -123,23 +125,57 @@ qa_chain = RetrievalQA.from_chain_type(
 )
 
 # ----------------- Streamlit UI -------------------
-st.set_page_config(page_title="OTIC Chatbot", page_icon="🤖")
+st.set_page_config(page_title="OTIC Chatbot", page_icon="🤖", layout="centered")
+
 st.title("🤖 OTIC Foundation AI Assistant")
-st.write("Ask anything about Otic Foundation!")
+st.markdown("Ask anything about **Otic Foundation** and get instant answers!")
+
+# Session state to store Q&A history and FAQ tracking
+if "history" not in st.session_state:
+    st.session_state.history = []  # stores (question, answer, timestamp)
+if "faq_counter" not in st.session_state:
+    st.session_state.faq_counter = Counter()
 
 # Input box
-query = st.text_input("Type your question here:")
+query = st.text_input("💬 Type your question here:")
 
 if query:
     with st.spinner("Thinking..."):
-        response = qa_chain.invoke({"query": query})
-        st.success("Done!")
+        try:
+            response = qa_chain.invoke({"query": query})
+            answer = response["result"]
 
-        st.markdown(f"**❓ You asked:** {query}")
-        st.markdown(f"**🧠 OTIC Bot:** {response['result']}")
+            # Save to history
+            st.session_state.history.append({
+                "question": query,
+                "answer": answer,
+                "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
 
-        # Optional expandable section for debugging
-        with st.expander("📄 Show Source Chunks Used"):
-            for i, doc in enumerate(response["source_documents"]):
-                st.markdown(f"**Chunk {i+1}:**")
-                st.code(doc.page_content)
+            # Count FAQ occurrences
+            st.session_state.faq_counter[query.lower()] += 1
+
+            st.success("Done!")
+            st.markdown(f"**❓ You asked:** {query}")
+            st.markdown(f"**🧠 OTIC Bot:** {answer}")
+
+        except Exception as e:
+            st.error(f"Error: {e}")
+
+# Display conversation history
+with st.expander("📜 Conversation History"):
+    for i, item in enumerate(reversed(st.session_state.history)):
+        st.markdown(f"**Q{i+1}:** {item['question']}")
+        st.markdown(f"**A{i+1}:** {item['answer']}")
+        st.caption(f"🕒 {item['time']}")
+        st.write("---")
+
+# Display top FAQs
+with st.expander("🔥 Frequently Asked Questions"):
+    if st.session_state.faq_counter:
+        for question, count in st.session_state.faq_counter.most_common(5):
+            st.markdown(f"**{question.capitalize()}** — Asked {count} times")
+    else:
+        st.info("No FAQs yet. Start asking questions!")
+
+
