@@ -79,9 +79,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Load environment variables
-QDRANT_URL = os.environ["QDRANT_URL"]
-QDRANT_API_KEY = os.environ["QDRANT_API_KEY"]
-GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
+if st.secrets.get("QDRANT_URL"):
+    QDRANT_URL = st.secrets["QDRANT_URL"]
+    QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"]
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+else:
+    load_dotenv()
+    QDRANT_URL = os.getenv("QDRANT_URL")
+    QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+# QDRANT_URL = os.environ["QDRANT_URL"]
+# QDRANT_API_KEY = os.environ["QDRANT_API_KEY"]
+# GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
 
 # Set your Google API key for Gemini
 llm = ChatGoogleGenerativeAI(model="models/gemini-1.5-flash-latest", google_api_key=GOOGLE_API_KEY)
