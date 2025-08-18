@@ -156,8 +156,8 @@ if query:
             st.session_state.faq_counter[query.lower()] += 1
 
             st.success("Done!")
-            st.markdown(f"**❓ You asked:** {query}")
-            st.markdown(f"**🧠 OTIC Bot:** {answer}")
+            st.markdown(f"** You asked:** {query}")
+            st.markdown(f"** OTIC Bot:** {answer}")
 
         except Exception as e:
             st.error(f"Error: {e}")
@@ -179,3 +179,13 @@ with st.expander("🔥 Frequently Asked Questions"):
         st.info("No FAQs yet. Start asking questions!")
 
 
+
+
+# <div style="text-align:center;">
+#   <iframe 
+#       src="https://oticaiagent-p47svvzvua5hdnjxvxoywh.streamlit.app/" 
+#       width="100%" 
+#       height="600" 
+#       style="border:1px solid #ddd; border-radius:10px;">
+#   </iframe>
+# </div>
